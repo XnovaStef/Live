@@ -1,41 +1,73 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, StatusBar, ScrollView, TouchableOpacity, Image, Modal, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, Text, StatusBar, ScrollView, TouchableOpacity, Image, Modal, ActivityIndicator, Linking } from 'react-native';
 import Carousel from '@/component/caroussel';
 import { FontAwesome } from '@expo/vector-icons';
-
+import axios from 'axios';
 
 interface Artiste {
-    id: number;
+    artiste: String;
+    id: String;
     image: any;
     name: string;
     price: string;
+    contact: string;
 }
 
 const Contact = () => {
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedArticle, setSelectedArticle] = useState<Artiste | null>(null);
     const [loading, setLoading] = useState(false);
+    const [articles, setArticles] = useState<Artiste[]>([]);
+
+    const staticImages = [
+        require('@/app/assets/damso1.jpg'),
+        require('@/app/assets/damso1.jpg'),
+        require('@/app/assets/carousel3.jpg'),
+        require('@/app/assets/booba.jpg'),
+        require('@/app/assets/carousel2.jpg'),
+    ];
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await axios.get('https://live-pro.onrender.com/api/live/liveLocation'); // Replace with your API endpoint
+                const lives = response.data;
+
+                // Transform the data to fit the Artiste interface and add static images
+                const transformedArticles = lives.map((live: any, index: number) => ({
+                    id: live._id,
+                    image: staticImages[index % staticImages.length], // Cycle through static images
+                    name: live.artiste,
+                    price: live.prix_ticket,
+                    contact: live.contact_artiste,
+                }));
+
+                setArticles(transformedArticles);
+            } catch (error) {
+                console.error('Error fetching data from API', error);
+            }
+        };
+
+        fetchData();
+    }, []);
 
     const handleShowDetails = (artiste: Artiste) => {
         setSelectedArticle(artiste);
         setModalVisible(true);
     };
 
-    const handleMiseEnRelation = () => {
-        setLoading(true);
-        setTimeout(() => {
-            setLoading(false);
-            setModalVisible(false);
-        }, 1000); // Simulating a network request delay
+    const handleMiseEnRelation = (contact: string) => {
+        const phoneUrl = `tel:${contact}`;
+        Linking.canOpenURL(phoneUrl)
+            .then(supported => {
+                if (supported) {
+                    Linking.openURL(phoneUrl);
+                } else {
+                    console.error('Error opening the URL', phoneUrl);
+                }
+            })
+            .catch(err => console.error('An error occurred', err));
     };
-
-    const articles: Artiste[] = [
-        { id: 1, image: require('@/app/assets/carousel1.jpg'), name: 'Artiste 1', price: '10$' },
-        { id: 2, image: require('@/app/assets/carousel2.jpg'), name: 'Artiste 2', price: '20$' },
-        { id: 3, image: require('@/app/assets/carousel3.jpg'), name: 'Artiste 3', price: '30$' },
-        { id: 4, image: require('@/app/assets/carousel1.jpg'), name: 'Artiste 4', price: '40$' },
-        { id: 5, image: require('@/app/assets/carousel2.jpg'), name: 'Artiste 5', price: '50$' },
-    ];
 
     return (
         <View style={styles.container}>
@@ -64,20 +96,20 @@ const Contact = () => {
                     onRequestClose={() => setModalVisible(false)}
                 >
                     <View style={styles.modalContainer}>
-                    <View style={styles.modalContent}>
-    <TouchableOpacity style={styles.closeIcon} onPress={() => setModalVisible(false)}>
-        <FontAwesome name="times" size={24} color="black" />
-    </TouchableOpacity>
-    <Text style={styles.modalArticleName}>{selectedArticle.name}</Text>
-    <Text style={styles.articlePrice}>{selectedArticle.price}</Text>
-    <TouchableOpacity style={styles.miseEnRelationButton} onPress={handleMiseEnRelation}>
-        {loading ? (
-            <ActivityIndicator size="small" color="#fff" />
-        ) : (
-            <Text style={styles.miseEnRelationButtonText}>Mise en relation</Text>
-        )}
-    </TouchableOpacity>
-</View>
+                        <View style={styles.modalContent}>
+                            <TouchableOpacity style={styles.closeIcon} onPress={() => setModalVisible(false)}>
+                                <FontAwesome name="times" size={24} color="black" />
+                            </TouchableOpacity>
+                            <Text style={styles.modalArticleName}>{selectedArticle.name}</Text>
+                            <Text style={styles.articlePrice}>{selectedArticle.price} FCFA</Text>
+                            <TouchableOpacity style={styles.miseEnRelationButton} onPress={() => handleMiseEnRelation(selectedArticle.contact)}>
+                                {loading ? (
+                                    <ActivityIndicator size="small" color="#fff" />
+                                ) : (
+                                    <Text style={styles.miseEnRelationButtonText}>Mise en relation</Text>
+                                )}
+                            </TouchableOpacity>
+                        </View>
                     </View>
                 </Modal>
             )}
@@ -198,7 +230,6 @@ const styles = StyleSheet.create({
         top: 10,
         right: 10,
     },
-    
 });
 
 export default Contact;

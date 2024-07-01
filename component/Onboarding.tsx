@@ -1,23 +1,45 @@
 import React, { useCallback, useRef, useState } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableWithoutFeedback, Keyboard, TouchableOpacity, Dimensions } from "react-native";
+import { View, Text, StyleSheet, TextInput, TouchableWithoutFeedback, Keyboard, TouchableOpacity, Dimensions, BackHandler } from "react-native";
 import PagerView from 'react-native-pager-view';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useRouter } from 'expo-router';
+import { Audio } from 'expo-av';
+import Background from "./background";
 
 const windowWidth = Dimensions.get('screen').width;
 
-const OnboardingPage = () => {
+const OnboardingPage = ({ searchQuery, setSearchQuery, genres, selectedGenre, onGenreSelect, selectedLive, date }) => {
   const pagerRef = useRef<PagerView>(null);
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
   const router = useRouter();
 
   const handlePageChange = useCallback((index: number) => {
     setCurrentPage(index);
   }, []);
 
-  const togglePlay = () => {
-    setIsPlaying(!isPlaying);
+  const togglePlay = async () => {
+    if (isPlaying) {
+      // Pause the sound
+      if (sound) {
+        await sound.pauseAsync();
+        setIsPlaying(false);
+      }
+    } else {
+      // Play the sound
+      if (sound) {
+        await sound.playAsync();
+        setIsPlaying(true);
+      } else {
+        const { sound: newSound } = await Audio.Sound.createAsync(
+          require('@/app/assets/extrait.mp3')  // Remplacez par le chemin de votre fichier audio
+        );
+        setSound(newSound);
+        await newSound.playAsync();
+        setIsPlaying(true);
+      }
+    }
   };
 
   const navigateToServices = () => {
@@ -36,6 +58,7 @@ const OnboardingPage = () => {
   };
 
   return (
+    
     <View style={styles.container}>
       <PagerView
         style={styles.pagerView}
@@ -50,25 +73,24 @@ const OnboardingPage = () => {
             <View style={styles.searchBarWrapper}>
               <TextInput
                 style={styles.searchBar}
-                placeholder="Marcory, Sicogi"
+                placeholder="Search for locations"
                 placeholderTextColor="#888"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
               />
             </View>
           </TouchableWithoutFeedback>
           <Text style={styles.h3}>Genre musical</Text>
           <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.button}>
-              <Text style={styles.buttonText}>Zouglou</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button}>
-              <Text style={styles.buttonText}>Zouk</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button}>
-              <Text style={styles.buttonText}>Rap</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button}>
-              <Text style={styles.buttonText}>Autres</Text>
-            </TouchableOpacity>
+            {genres.map((genre, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[styles.button, selectedGenre === genre && styles.selectedGenreButton]}
+                onPress={() => onGenreSelect(genre)}
+              >
+                <Text style={styles.buttonText}>{genre}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
           <View style={styles.actionButtonsContainer}>
             <TouchableOpacity style={styles.actionButton} onPress={navigateToContact}>
@@ -86,9 +108,10 @@ const OnboardingPage = () => {
             <View style={styles.searchBarWrapper}>
               <TextInput
                 style={styles.searchBar}
-                placeholder="Damso"
+                placeholder="Cherchez artiste"
                 placeholderTextColor="#888"
-                underlineColorAndroid="transparent"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
               />
             </View>
           </TouchableWithoutFeedback>
@@ -102,8 +125,8 @@ const OnboardingPage = () => {
           <View style={styles.section}>
             <Icon name="clock-o" size={20} color="pink" style={styles.sectionIcon} />
             <View>
-              <Text style={styles.sectionText}>Heure</Text>
-              <Text style={styles.h2}>03:00 PM</Text>
+              <Text style={styles.sectionText}>Date</Text>
+              <Text style={styles.h2}>{date}</Text>
             </View>
           </View>
           <View style={styles.section}>
@@ -135,7 +158,7 @@ const OnboardingPage = () => {
       </TouchableOpacity>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -156,19 +179,19 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: "#1E1E1E"
+    color: "#1E1E1E",
   },
   h2: {
     fontSize: 11,
     marginTop: 5,
     fontWeight: '100',
-    color: "#9D9D9D"
+    color: "#9D9D9D",
   },
   h3: {
     fontSize: 15,
     marginTop: 40,
     fontWeight: '300',
-    color: "#1E1E1E"
+    color: "#1E1E1E",
   },
   searchBarWrapper: {
     borderBottomWidth: 1,
@@ -215,6 +238,9 @@ const styles = StyleSheet.create({
   buttonText1: {
     color: 'white',
     fontSize: 14,
+  },
+  selectedGenreButton: {
+    backgroundColor: '#ccc',
   },
   section: {
     flexDirection: 'row',

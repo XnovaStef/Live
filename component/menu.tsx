@@ -13,6 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import FeatherIcon from 'react-native-vector-icons/Feather';
+import Background from './background';
 
 
 export default function Menu() {
@@ -37,7 +38,7 @@ export default function Menu() {
       .then(token => {
         AsyncStorage.getItem('userId')
           .then(userId => {
-            axios.get(`http://192.168.1.6:3005/api/user/users/${userId}`, {
+            axios.get(`https://live-pro.onrender.com/api/user/users/${userId}`, {
               headers: { Authorization: `Bearer ${token}` }
             })
               .then(response => {
@@ -57,65 +58,14 @@ export default function Menu() {
  
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+
+    <Background>
+       <SafeAreaView style={{ flex: 1,  }}>
       <View style={styles.container}>
         
-         
-          <View>
-            <Text style={styles.profileName}>{prenom}</Text>
-            <Text style={styles.profileAddress}>
-              
-            </Text>
-          </View>
         </View>
         <ScrollView>
           <View style={styles.section}>
-            
-            <TouchableOpacity
-              
-              style={styles.row}>
-              <View style={[styles.rowIcon, { backgroundColor: '#32c759' }]}>
-                <FeatherIcon color="#fff" name="user" size={20} />
-              </View>
-              <Text style={styles.rowLabel}>Nom & Prénom(s)</Text>
-              <View style={styles.rowSpacer} />
-              <FeatherIcon
-                color="#C6C6C6"
-                name="chevron-right"
-                size={20} />
-            </TouchableOpacity>
-            <TouchableOpacity
-              
-              style={styles.row}>
-              <View style={[styles.rowIcon, { backgroundColor: '#32c759' }]}>
-                <FeatherIcon
-                  color="#fff"
-                  name="mail"
-                  size={20} />
-              </View>
-              <Text style={styles.rowLabel}>Email</Text>
-              <View style={styles.rowSpacer} />
-              <FeatherIcon
-                color="#C6C6C6"
-                name="chevron-right"
-                size={20} />
-            </TouchableOpacity>
-            <TouchableOpacity
-             onPress={ ()=> navigation.navigate('welcome')}
-              style={styles.row}>
-              <View style={[styles.rowIcon, { backgroundColor: '#32c759' }]}>
-                <FeatherIcon
-                  color="#fff"
-                  name="log-out"
-                  size={20} />
-              </View>
-              <Text style={styles.rowLabel}>Déconnexion</Text>
-              <View style={styles.rowSpacer} />
-              <FeatherIcon
-                color="#C6C6C6"
-                name="chevron-right"
-                size={20} />
-            </TouchableOpacity>
            
             <TouchableOpacity
              onPress={() => navigation.navigate("services")}
@@ -201,10 +151,29 @@ export default function Menu() {
                 name="chevron-right"
                 size={20} />
             </TouchableOpacity>
+
+            <TouchableOpacity
+             onPress={ ()=> navigation.navigate('login')}
+              style={styles.row}>
+              <View style={[styles.rowIcon, { backgroundColor: 'red' }]}>
+                <FeatherIcon
+                  color="#fff"
+                  name="log-out"
+                  size={20} />
+              </View>
+              <Text style={styles.rowLabel}>Déconnexion</Text>
+              <View style={styles.rowSpacer} />
+              <FeatherIcon
+                color="#C6C6C6"
+                name="chevron-right"
+                size={20} />
+            </TouchableOpacity>
           </View>
         </ScrollView>
       
     </SafeAreaView>
+    </Background>
+   
   );
 }
 
@@ -270,7 +239,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-start',
     height: 50,
-    backgroundColor: '#f2f2f2',
+    backgroundColor: 'rgba(255,165,0,0.3)',
     borderRadius: 8,
     marginBottom: 12,
     paddingLeft: 12,

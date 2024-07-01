@@ -9,7 +9,8 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   Dimensions,
-  Alert
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import Background from '@/component/background';
 import { StatusBar } from 'expo-status-bar';
@@ -18,6 +19,7 @@ import axios from 'axios';
 
 const Register = () => {
   const { width, height } = Dimensions.get('window');
+  const navigation = useNavigation();
 
   const [nom, setNom] = React.useState('');
   const [prenom, setPrenom] = React.useState('');
@@ -26,6 +28,7 @@ const Register = () => {
   const [mdp, setMdp] = React.useState('');
   const [confirmPassword, setConfirmPassword] = React.useState('');
   const [message, setMessage] = React.useState('');
+  const [isRegistering, setIsRegistering] = React.useState(false); // State to track registration process
 
   const handleRegister = async () => {
     if (!nom || !prenom || !email || !tel || !mdp || !confirmPassword) {
@@ -43,28 +46,26 @@ const Register = () => {
       tel: tel,
       email: email,
       mdp: mdp,
-      
     };
 
-    axios
-      .post('http://192.168.1.17:3005/api/user/register', data)
-      .then((response) => {
-        console.log(data);
-        console.log(response.data);
-        Alert.alert('Compte créé avec succès !');
-        navigation.navigate('login');
-      })
-      .catch((error) => {
-        console.log(error.response);
-        if (error.response.status === 500) {
-          Alert.alert('Email déjà utilisé.');
-        } else {
-          Alert.alert('Numéro déjà utilisé !');
-        }
-      });
-  };
+    setIsRegistering(true); // Set state to true when registration starts
 
-  const navigation = useNavigation();
+    try {
+      const response = await axios.post('https://live-pro.onrender.com/api/user/register', data);
+      console.log(response.data);
+      Alert.alert('Compte créé avec succès !');
+      navigation.navigate('verify');
+    } catch (error) {
+      console.log(error.response);
+      if (error.response.status === 500) {
+        Alert.alert('Email déjà utilisé.');
+      } else {
+        Alert.alert('Numéro déjà utilisé !');
+      }
+    } finally {
+      setIsRegistering(false); // Set state to false after registration completes (success or error)
+    }
+  };
 
   const navigateToLogin = () => {
     navigation.navigate('login');
@@ -86,21 +87,21 @@ const Register = () => {
               style={[styles.input, { width: '100%', marginBottom: height * 0.02 }]}
               placeholder="Nom"
               onChangeText={setNom}
-              placeholderTextColor='#FFF'
+              placeholderTextColor="#FFF"
               value={nom}
             />
             <TextInput
               style={[styles.input, { width: '100%', marginBottom: height * 0.02 }]}
               placeholder="Prénom"
               onChangeText={setPrenom}
-              placeholderTextColor='#FFF'
+              placeholderTextColor="#FFF"
               value={prenom}
             />
             <TextInput
               style={[styles.input, { width: '100%', marginBottom: height * 0.02 }]}
               placeholder="Email"
               onChangeText={setEmail}
-              placeholderTextColor='#FFF'
+              placeholderTextColor="#FFF"
               value={email}
               keyboardType="email-address"
             />
@@ -108,7 +109,7 @@ const Register = () => {
               style={[styles.input, { width: '100%', marginBottom: height * 0.02 }]}
               placeholder="Téléphone"
               onChangeText={setTel}
-              placeholderTextColor='#FFF'
+              placeholderTextColor="#FFF"
               value={tel}
               keyboardType="phone-pad"
             />
@@ -117,7 +118,7 @@ const Register = () => {
               placeholder="Mot de passe"
               onChangeText={setMdp}
               value={mdp}
-              placeholderTextColor='#FFF'
+              placeholderTextColor="#FFF"
               secureTextEntry
             />
             <TextInput
@@ -125,15 +126,17 @@ const Register = () => {
               placeholder="Confirmer mot de passe"
               onChangeText={setConfirmPassword}
               value={confirmPassword}
-              placeholderTextColor='#FFF'
+              placeholderTextColor="#FFF"
               secureTextEntry
             />
-            <TouchableOpacity style={[styles.button, { width: '100%' }]} onPress={handleRegister}>
-              <Text style={[styles.buttonText, { color: 'orange' }]}>S'inscrire</Text>
+            <TouchableOpacity style={[styles.button, { width: '100%' }]} onPress={handleRegister} disabled={isRegistering}>
+              {isRegistering ? (
+                <ActivityIndicator size="small" color="orange" />
+              ) : (
+                <Text style={[styles.buttonText, { color: 'orange' }]}>S'inscrire</Text>
+              )}
             </TouchableOpacity>
-            <TouchableOpacity style={[styles.button, { width: '100%' }]} onPress={navigateToLogin}>
-              <Text style={[styles.buttonText, { color: 'orange' }]}>Se connecter</Text>
-            </TouchableOpacity>
+            
           </View>
         </ScrollView>
       </TouchableWithoutFeedback>
@@ -142,7 +145,6 @@ const Register = () => {
 };
 
 const styles = StyleSheet.create({
-  
   form: {
     alignItems: 'center',
   },
@@ -152,11 +154,11 @@ const styles = StyleSheet.create({
     borderColor: 'gray',
     borderRadius: 10,
     paddingLeft: 10,
-    color: "#FFF"
+    color: '#FFF',
   },
   button: {
     height: 50,
-    backgroundColor: 'rgba(255,165,0,0.3)', // Transparent with a tint of orange
+    backgroundColor: 'rgba(255, 165, 0, 0.3)', // Transparent with a tint of orange
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',

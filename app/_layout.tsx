@@ -11,6 +11,8 @@ import Reservation from './reservation';
 import Services from './services';
 import Contact from './contact';
 import Localisation from './location';
+import Verify from './verify';
+import Paiement from './paiement';
 
 //import { Stack } from "expo-router";
 
@@ -61,10 +63,12 @@ const Layout = () => {
     >
       <Stack.Screen name="welcome" component={Welcome} />
       <Stack.Screen name="register" component={Register} />
+      <Stack.Screen name="verify" component={Verify} />
       <Stack.Screen name="login" component={Login} />
       <Stack.Screen name="forgot" component={Forgot} />
       <Stack.Screen name="home" component={Home} />
       <Stack.Screen name="reservation" component={Reservation} />
+      <Stack.Screen name="paiement" component={Paiement} />
       <Stack.Screen name="services" component={Services} />
       <Stack.Screen name="contact" component={Contact} />
       <Stack.Screen name="location" component={Localisation} />

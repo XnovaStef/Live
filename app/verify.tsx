@@ -16,29 +16,27 @@ import { useNavigation } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { Alert } from 'react-native';
 
-const Forgot = () => {
+const Verify = () => {
     const { width, height } = Dimensions.get('window');
 
-    const [newPassword, setNewPassword] = React.useState('');
-    const [email, setEmail] = React.useState('');
+    const [code, setCode] = React.useState('');
     const [message, setMessage] = useState('');
     const navigation = useNavigation();
 
     
 
     const handleForgotPassword = async () => {
-      if (!email || !newPassword) {
-        Alert.alert('Veuillez remplir tous les champs.');
+      if (!code) {
+        Alert.alert('Veuillez entrer le code de vérification.');
         return;
       }
   
       const data = {
-        email: email,
-        newPassword: newPassword,
+        code: code
       };
   
       try {
-        const response = await axios.post('https://live-pro.onrender.com/api/user/forgot', data);
+        const response = await axios.post('https://live-pro.onrender.com/api/user/verify', data);
         setMessage(response.data.message);
         Alert.alert("Succès", response.data.message);
         navigation.navigate('login');
@@ -63,24 +61,15 @@ const Forgot = () => {
           <View style={[styles.form, { width: width * 0.8 }]}>
             <TextInput
               style={[styles.input, { width: '100%', marginBottom: height * 0.03 }]}
-              placeholder="Email"
-              onChangeText={setEmail}
+              placeholder="Code vérification"
+              onChangeText={setCode}
               placeholderTextColor='#FFF'
-              value={email}
-              keyboardType="email-address"
-            />
-
-<TextInput
-              style={[styles.input, { width: '100%', marginBottom: height * 0.03 }]}
-              placeholder="Nouveau mot de passe"
-              onChangeText={setNewPassword}
-              placeholderTextColor='#FFF'
-              value={newPassword}
-              keyboardType="email-address"
+              value={code}
+              keyboardType="numeric"
             />
             
             <TouchableOpacity style={[styles.button, { width: '100%' }]} onPress={handleForgotPassword}>
-              <Text style={[styles.buttonText, { color: 'orange' }]}>Envoyer</Text>
+              <Text style={[styles.buttonText, { color: 'orange' }]}>Vérifier</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -118,4 +107,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Forgot;
+export default Verify;

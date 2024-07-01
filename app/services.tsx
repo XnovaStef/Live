@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import ScrollingLogos from '@/component/logoScrolling';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import Background from '@/component/background';
 
 const windowWidth = Dimensions.get('screen').width;
 
@@ -27,7 +28,7 @@ const Services = () => {
           console.log('User ID:', userId); // Vérifiez l'ID utilisateur récupéré
           if (userId) {
             try {
-              const response = await axios.get(`http://192.168.1.17:3005/api/user/users/${userId}`, {
+              const response = await axios.get(`https://live-pro.onrender.com/api/user/users/${userId}`, {
                 headers: { Authorization: `Bearer ${token}` }
               });
               setNom(response.data.nom);
@@ -60,8 +61,9 @@ const Services = () => {
 
   return (
     <>
-      <View style={styles.container}>
-        <StatusBar barStyle="dark-content" backgroundColor="#f8f8f8" />
+    <Background>
+    <View style={styles.container}>
+        <StatusBar barStyle="white" backgroundColor="#f8f8f8" />
         <View style={styles.header}>
           <Text style={styles.title}>
             Bienvenue <Text style={styles.highlight}>{prenom}</Text>
@@ -100,6 +102,8 @@ const Services = () => {
         </ScrollView>
         <View style={{ width: '100%', height: Math.min(windowWidth * 0.40) }}></View>
       </View>
+    </Background>
+      
     </>
   );
 };
@@ -108,7 +112,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#FFF',
   },
   header: {
     alignItems: 'center',
@@ -118,7 +121,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#FFF',
     marginBottom: 10,
     marginTop: 20,
   },
@@ -128,7 +131,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 18,
     fontWeight: '500',
-    color: '#555',
+    color: '#FFF',
   },
   inputContainer: {
     flexDirection: 'row',

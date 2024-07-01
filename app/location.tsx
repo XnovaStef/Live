@@ -22,6 +22,8 @@ const Localisation = () => {
     const [cartVisible, setCartVisible] = useState(false);
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
+    const [showStartPicker, setShowStartPicker] = useState(false);
+    const [showEndPicker, setShowEndPicker] = useState(false);
 
     const handleIncrement = (articleId: number) => {
         setArticleQuantities(prevQuantities => ({
@@ -51,6 +53,10 @@ const Localisation = () => {
         setModalVisible(false);
     };
 
+    const getTotalCartItems = () => {
+        return Object.values(articleQuantities).reduce((total, quantity) => total + quantity, 0);
+    };
+
     const articles: Article[] = [
         { id: 1, image: require('@/app/assets/carousel1.jpg'), name: 'Article 1', price: '10$', description: 'Description 1' },
         { id: 2, image: require('@/app/assets/carousel2.jpg'), name: 'Article 2', price: '20$', description: 'Description 2' },
@@ -69,15 +75,7 @@ const Localisation = () => {
                 {articles.map(article => (
                     <View key={article.id} style={styles.article}>
                         <Image source={article.image} style={styles.articleImage} />
-                        <View style={styles.quantityButtons}>
-                            <TouchableOpacity style={styles.button} onPress={() => handleDecrement(article.id)}>
-                                <Text style={styles.buttonText}>-</Text>
-                            </TouchableOpacity>
-                            <Text style={styles.quantityText}>{articleQuantities[article.id] || 0}</Text>
-                            <TouchableOpacity style={styles.button} onPress={() => handleIncrement(article.id)}>
-                                <Text style={styles.buttonText}>+</Text>
-                            </TouchableOpacity>
-                        </View>
+                        <Text style={styles.articleName}>{article.name}</Text>
                         <TouchableOpacity style={styles.detailsButton} onPress={() => handleShowDetails(article)}>
                             <Text style={styles.detailsButtonText}>Voir Détail</Text>
                         </TouchableOpacity>
@@ -85,8 +83,13 @@ const Localisation = () => {
                 ))}
             </ScrollView>
 
-            <TouchableOpacity style={styles.rentButton} onPress={() => setCartVisible(true)}>
+            <TouchableOpacity style={styles.cartButton} onPress={() => setCartVisible(true)}>
                 <Ionicons name="cart" size={30} color="white" />
+                {getTotalCartItems() > 0 && (
+                    <View style={styles.cartBadge}>
+                        <Text style={styles.cartBadgeText}>{getTotalCartItems()}</Text>
+                    </View>
+                )}
             </TouchableOpacity>
 
             <Modal
@@ -103,24 +106,48 @@ const Localisation = () => {
                         <Text style={styles.articleName}>{selectedArticle?.name}</Text>
                         <Text style={styles.articlePrice}>{selectedArticle?.price}</Text>
                         <Text style={styles.articleDescription}>{selectedArticle?.description}</Text>
-                        <Text style={styles.articleQuantity}>Quantité: {articleQuantities[selectedArticle?.id || 0] || 0}</Text>
+                        <View style={styles.quantityButtons}>
+                            <TouchableOpacity style={styles.button} onPress={() => handleDecrement(selectedArticle?.id || 0)}>
+                                <Text style={styles.buttonText}>-</Text>
+                            </TouchableOpacity>
+                            <Text style={styles.quantityText}>{articleQuantities[selectedArticle?.id || 0] || 0}</Text>
+                            <TouchableOpacity style={styles.button} onPress={() => handleIncrement(selectedArticle?.id || 0)}>
+                                <Text style={styles.buttonText}>+</Text>
+                            </TouchableOpacity>
+                        </View>
                         <View style={styles.datePickerContainer}>
                             <Text>Date de début:</Text>
-                            <DateTimePicker
-                                value={startDate}
-                                mode="date"
-                                display="default"
-                                onChange={(event, date) => date && setStartDate(date)}
-                            />
+                            <TouchableOpacity onPress={() => setShowStartPicker(true)}>
+                                <Text style={styles.datePickerText}>{startDate.toDateString()}</Text>
+                            </TouchableOpacity>
+                            {showStartPicker && (
+                                <DateTimePicker
+                                    value={startDate}
+                                    mode="date"
+                                    display="default"
+                                    onChange={(event, date) => {
+                                        setShowStartPicker(false);
+                                        date && setStartDate(date);
+                                    }}
+                                />
+                            )}
                         </View>
                         <View style={styles.datePickerContainer}>
                             <Text>Date de fin:</Text>
-                            <DateTimePicker
-                                value={endDate}
-                                mode="date"
-                                display="default"
-                                onChange={(event, date) => date && setEndDate(date)}
-                            />
+                            <TouchableOpacity onPress={() => setShowEndPicker(true)}>
+                                <Text style={styles.datePickerText}>{endDate.toDateString()}</Text>
+                            </TouchableOpacity>
+                            {showEndPicker && (
+                                <DateTimePicker
+                                    value={endDate}
+                                    mode="date"
+                                    display="default"
+                                    onChange={(event, date) => {
+                                        setShowEndPicker(false);
+                                        date && setEndDate(date);
+                                    }}
+                                />
+                            )}
                         </View>
                         <TouchableOpacity style={styles.addToCartButton} onPress={handleAddToCart}>
                             <Text style={styles.addToCartButtonText}>Ajouter au Panier</Text>
@@ -160,7 +187,7 @@ const Localisation = () => {
                             })}
                         </View>
                         <TouchableOpacity style={styles.rentButton} onPress={handleRent}>
-                        <Text style={styles.rentButtonText}>{isApproved ? '✓' : 'Louer'}</Text>
+                            <Text style={styles.rentButtonText}>{isApproved ? '✓' : 'Louer'}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -184,106 +211,87 @@ const styles = StyleSheet.create({
         transform: [{ rotate: '360deg' }],
         borderRadius: 20,
         shadowColor: '#000',
-        shadowOpacity: 2,
-        shadowOffset: {
-            width: 2,
-            height: 2
-        }
+        shadowOpacity: 0.2,
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 8,
+        elevation: 2,
+        backgroundColor: '#fff',
     },
     articlesContainer: {
-        flex: 1,
         width: '95%',
-        height: 200,
-        borderRadius: 20,
-        shadowColor: '#000',
-        shadowOpacity: 0.2,
-        shadowOffset: {
-            width: 2,
-            height: 2
-        }
+        marginTop: 20,
     },
     article: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ccc',
-    },
-    quantityButtons: {
-        flexDirection: 'row',
+        backgroundColor: '#f8f8f8',
+        borderRadius: 10,
+        padding: 10,
+        marginBottom: 20,
+        shadowColor: '#000',
+        shadowOpacity: 0.1,
+        shadowOffset: { width: 0, height: 2 },
+        shadowRadius: 8,
+        elevation: 2,
         alignItems: 'center',
     },
     articleImage: {
-        width: 80,
-        height: 80,
-        marginRight: 20,
+        width: windowWidth * 0.8,
+        height: 150,
         borderRadius: 10,
     },
-    button: {
-        width: 30,
-        height: 30,
-        borderRadius: 15,
-        backgroundColor: 'pink',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginHorizontal: 10,
-    },
-    buttonText: {
-        color: '#fff',
-        fontSize: 20,
-        fontWeight: 'bold',
-    },
-    quantityText: {
+    articleName: {
         fontSize: 18,
         fontWeight: 'bold',
+        marginTop: 10,
     },
     detailsButton: {
-        padding: 10,
-        backgroundColor: 'blue',
+        marginTop: 10,
+        backgroundColor: '#007bff',
+        paddingVertical: 8,
+        paddingHorizontal: 20,
         borderRadius: 5,
     },
     detailsButtonText: {
-        color: 'white',
-        fontSize: 14,
-    },
-    rentButton: {
-        marginTop: 20,
-        marginBottom: 15,
-        width: '60%',
-        alignSelf: 'center',
-        backgroundColor: 'pink',
-        padding: 15,
-        borderRadius: 10,
-        alignItems: 'center',
-    },
-    rentButtonText: {
-        color: 'white',
-        fontSize: 18,
-        fontWeight: 'bold',
+        color: '#fff',
+        fontSize: 16,
     },
     cartButton: {
         position: 'absolute',
-        top: 5,
-        right: 20,
-        backgroundColor: 'pink',
-        padding: 10,
+        bottom: 20, // Adjust the value as needed
+        right: 20, // Adjust the value as needed
+        backgroundColor: '#007bff',
+        width: 50,
+        height: 50,
         borderRadius: 25,
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    cartBadge: {
+        position: 'absolute',
+        top: -5,
+        right: -5,
+        backgroundColor: 'red',
+        width: 20,
+        height: 20,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    cartBadgeText: {
+        color: '#fff',
+        fontSize: 12,
+        fontWeight: 'bold',
     },
     modalContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'rgba(0,0,0,0.5)',
     },
     modalContent: {
-        width: '80%',
-        padding: 20,
-        backgroundColor: 'white',
+        width: '90%',
+        backgroundColor: '#fff',
         borderRadius: 10,
+        padding: 20,
         alignItems: 'center',
     },
     closeIcon: {
@@ -291,47 +299,64 @@ const styles = StyleSheet.create({
         top: 10,
         right: 10,
     },
-    articleName: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 10,
-    },
     articlePrice: {
-        fontSize: 20,
-        color: 'green',
-        marginBottom: 10,
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginTop: 5,
     },
     articleDescription: {
-        fontSize: 16,
+        fontSize: 14,
         textAlign: 'center',
-        marginBottom: 20,
+        marginTop: 10,
     },
-    articleQuantity: {
+    quantityButtons: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 20,
+    },
+    button: {
+        width: 30,
+        height: 30,
+        borderRadius: 15,
+        backgroundColor: '#007bff',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    buttonText: {
+        color: '#fff',
         fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 20,
+    },
+    quantityText: {
+        fontSize: 18,
+        marginHorizontal: 10,
     },
     datePickerContainer: {
-        width: '100%',
-        marginBottom: 20,
+        marginTop: 20,
+        alignItems: 'center',
+    },
+    datePickerText: {
+        color: '#007bff',
+        fontSize: 16,
+        textDecorationLine: 'underline',
     },
     addToCartButton: {
-        padding: 10,
-        backgroundColor: 'green',
+        backgroundColor: '#007bff',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
         borderRadius: 5,
+        marginTop: 20,
     },
     addToCartButtonText: {
-        color: 'white',
-        fontSize: 14,
+        color: '#fff',
+        fontSize: 16,
     },
     cartTitle: {
-        fontSize: 24,
+        fontSize: 20,
         fontWeight: 'bold',
         marginBottom: 20,
     },
     cartItemsContainer: {
         width: '100%',
-        marginBottom: 20,
     },
     cartItem: {
         flexDirection: 'row',
@@ -341,23 +366,36 @@ const styles = StyleSheet.create({
     cartItemImage: {
         width: 60,
         height: 60,
-        marginRight: 20,
         borderRadius: 10,
     },
     cartItemDetails: {
-        flex: 1,
+        marginLeft: 10,
     },
     cartItemName: {
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: 'bold',
     },
     cartItemQuantity: {
-        fontSize: 16,
+        fontSize: 14,
+        color: '#666',
     },
     cartItemPrice: {
         fontSize: 16,
-        color: 'green',
+        color: '#000',
+        fontWeight: 'bold',
+    },
+    rentButton: {
+        backgroundColor: '#007bff',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 5,
+        marginTop: 20,
+    },
+    rentButtonText: {
+        color: '#fff',
+        fontSize: 16,
     },
 });
 
 export default Localisation;
+

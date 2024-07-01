@@ -37,6 +37,12 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Allow Music_map to use your location."
         }
+      ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone."
+        }
       ]
     ],
     "experiments": {

@@ -5,7 +5,8 @@ import { BottomSheetModalProvider, BottomSheetModal } from '@gorhom/bottom-sheet
 import { Ionicons } from '@expo/vector-icons';
 import OnboardingPage from '@/component/Onboarding';
 import Map from '@/component/map';
-import Menu from '@/component/menu'
+import Menu from '@/component/menu';
+import axios from 'axios';
 
 type IconName = 'menu' | 'close';
 
@@ -14,6 +15,14 @@ const Home = () => {
     const [iconName, setIconName] = useState<IconName>('menu');
     const bottomSheetModalRef1 = useRef<BottomSheetModal | null>(null);
     const bottomSheetModalRef2 = useRef<BottomSheetModal | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedGenre, setSelectedGenre] = useState('');
+    const [userLocation, setUserLocation] = useState(null);
+    const [lives, setLives] = useState([]);
+    const [filteredLives, setFilteredLives] = useState([]);
+    const [genres, setGenres] = useState([]);
+    const [date, setDate] = useState([]);
+   
 
     const snapPoints = useMemo(() => ['45%', '85%'], []);
 
@@ -21,11 +30,11 @@ const Home = () => {
         if (isFirstSheetVisible) {
             bottomSheetModalRef1.current?.dismiss();
             bottomSheetModalRef2.current?.present();
-            setIconName('close'); // Changer l'icône en "close"
+            setIconName('close'); // Change the icon to "close"
         } else {
             bottomSheetModalRef2.current?.dismiss();
             bottomSheetModalRef1.current?.present();
-            setIconName('menu'); // Changer l'icône en "menu"
+            setIconName('menu'); // Change the icon to "menu"
         }
         setIsFirstSheetVisible(!isFirstSheetVisible);
     }, [isFirstSheetVisible]);
@@ -33,6 +42,67 @@ const Home = () => {
     useEffect(() => {
         bottomSheetModalRef1.current?.present();
     }, []);
+
+    // Fetch user location and lives data here
+    useEffect(() => {
+        // Simulate fetching user location
+        setUserLocation({
+            latitude: 37.78825,
+            longitude: -122.4324,
+        });
+
+        // Fetch lives data including genres
+        const fetchLives = async () => {
+            try {
+                const response = await axios.get('https://live-pro.onrender.com/api/live/liveLocation');
+                const livesData = response.data;
+                setLives(livesData);
+                setFilteredLives(livesData);
+
+                // Extract genres from lives data
+                const genresData = [...new Set(livesData.map(live => live.genre))];
+                setGenres(genresData);
+                const dateData = [...new Set(livesData.map(live => live.date_live))];
+                setDate(dateData);
+            } catch (error) {
+                console.error('Error fetching lives:', error);
+            }
+        };
+
+        fetchLives();
+    }, []);
+
+    useEffect(() => {
+        // Filter the lives based on search query and selected genre
+        let filtered = lives;
+
+        if (searchQuery) {
+            filtered = filtered.filter(live =>
+                live.lieu.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                live.artiste.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        }
+
+        
+
+        if (selectedGenre) {
+            filtered = filtered.filter(live => live.genre === selectedGenre);
+        }
+
+        setFilteredLives(filtered);
+    }, [searchQuery, selectedGenre, lives]);
+
+    const handleGenreSelect = (genre) => {
+        setSelectedGenre(genre);
+    };
+
+    const handleLiveSelect = (live) => {
+        setSelectedLive(live);
+    };
+
+    const onMarkerPress = (live: Live) => {
+        setSelectedLive(live); // Mettre à jour les détails du live sélectionné
+    };
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
@@ -42,21 +112,28 @@ const Home = () => {
                     <TouchableOpacity style={styles.menuButton} onPress={handlePresentModalPress}>
                         <Ionicons name={iconName} size={24} color="black" />
                     </TouchableOpacity>
-                    <Map />
+                    <Map filteredLives={filteredLives} onLiveSelect={handleLiveSelect} />
                 </View>
                 <BottomSheetModal
                     ref={bottomSheetModalRef1}
                     index={0}
                     snapPoints={snapPoints}
                 >
-                    <OnboardingPage />
+                    <OnboardingPage 
+                        searchQuery={searchQuery}
+                        setSearchQuery={setSearchQuery}
+                        genres={genres}
+                        date={date}
+                        selectedGenre={selectedGenre}
+                        onGenreSelect={handleGenreSelect} selectedLive={undefined}                        
+                    />
                 </BottomSheetModal>
                 <BottomSheetModal
                     ref={bottomSheetModalRef2}
                     index={0}
                     snapPoints={snapPoints}
                 >
-                    <Menu/>
+                    <Menu />
                 </BottomSheetModal>
             </BottomSheetModalProvider>
         </GestureHandlerRootView>
