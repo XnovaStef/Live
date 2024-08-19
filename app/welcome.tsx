@@ -1,29 +1,24 @@
-import React from 'react';
-import { StyleSheet, View, TouchableOpacity, Text } from 'react-native';
+import React, { useEffect } from 'react';
+import { StyleSheet, View, Text } from 'react-native';
 import Background from '@/component/background';
 import { useNavigation } from '@react-navigation/native';
 
 const Welcome = () => {
     const navigation = useNavigation();
 
-    const navigateToRegister = () => {
-        navigation.navigate('register');
-    };
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            navigation.navigate('home'); // Remplacez 'login' par la page que vous souhaitez afficher après la splash screen
+        }, 3000); // 3 secondes
 
-    const navigateToLogin = () => {
-        navigation.navigate('login');
-    };
+        return () => clearTimeout(timer); // Nettoyer le timer si le composant est démonté
+    }, [navigation]);
 
     return (
         <View style={styles.container}>
             <Background>
                 <View style={styles.content}>
-                    <TouchableOpacity style={styles.button} onPress={navigateToRegister}>
-                        <Text style={styles.buttonText}>S'inscrire</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.button} onPress={navigateToLogin}>
-                        <Text style={styles.buttonText}>Se connecter</Text>
-                    </TouchableOpacity>
+                    <Text style={styles.splashText}>Bienvenue</Text>
                 </View>
             </Background>
         </View>
@@ -40,21 +35,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    button: {
-        backgroundColor: 'rgba(255,165,0,0.3)', // Transparent
-        paddingVertical: 15,
-        paddingHorizontal: 30,
-        borderRadius: 25,
-        borderWidth: 1,
-        borderColor: '#fff',
-        marginBottom: 20, // Espacement entre les boutons
-        width: '80%', // Largeur fixe des boutons
-    },
-    buttonText: {
+    splashText: {
         color: '#fff',
-        fontSize: 18,
+        fontSize: 24,
         fontWeight: 'bold',
-        textAlign: 'center', // Centrer le texte
+        textAlign: 'center',
     },
 });
 

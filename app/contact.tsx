@@ -3,10 +3,11 @@ import { StyleSheet, View, Text, StatusBar, ScrollView, TouchableOpacity, Image,
 import Carousel from '@/component/caroussel';
 import { FontAwesome } from '@expo/vector-icons';
 import axios from 'axios';
+import Background from '@/component/background';
 
 interface Artiste {
-    artiste: String;
-    id: String;
+    artiste: string;
+    id: string;
     image: any;
     name: string;
     price: string;
@@ -20,11 +21,11 @@ const Contact = () => {
     const [articles, setArticles] = useState<Artiste[]>([]);
 
     const staticImages = [
-        require('@/app/assets/damso1.jpg'),
-        require('@/app/assets/damso1.jpg'),
-        require('@/app/assets/carousel3.jpg'),
-        require('@/app/assets/booba.jpg'),
-        require('@/app/assets/carousel2.jpg'),
+        
+        require('@/app/assets/Yodé.jpg'),
+        require('@/app/assets/fally.jpg'),
+        require('@/app/assets/koffi.jpg'),
+        require('@/app/assets/VDA.jpg'),
     ];
 
     useEffect(() => {
@@ -38,7 +39,7 @@ const Contact = () => {
                     id: live._id,
                     image: staticImages[index % staticImages.length], // Cycle through static images
                     name: live.artiste,
-                    price: live.prix_ticket,
+                    price: live.prix_contact,
                     contact: live.contact_artiste,
                 }));
 
@@ -82,7 +83,7 @@ const Contact = () => {
                         <View style={styles.articleInfo}>
                             <Text style={styles.articleName}>{artiste.name}</Text>
                             <TouchableOpacity style={styles.detailsButton} onPress={() => handleShowDetails(artiste)}>
-                                <FontAwesome name="phone" size={24} color="white" />
+                                <FontAwesome name="phone" size={30} color="white" />
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -123,38 +124,28 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'flex-start',
         paddingTop: 30,
-        backgroundColor: '#fff',
+        backgroundColor: '#FFF',
     },
     rectangle: {
         top: "5%",
         width: '95%',
         height: '20%',
-        transform: [{ rotate: '360deg' }],
-        borderRadius: 20,
-        shadowColor: '#000',
-        shadowOpacity: 2,
-        shadowOffset: {
-            width: 2,
-            height: 2
-        },
-        marginBottom:10
-    },
-    articlesContainer: {
-        top:'10%',
-        flex: 6,
-        width: '95%',
-        height: 200,
         borderRadius: 20,
         shadowColor: '#000',
         shadowOpacity: 0.2,
         shadowOffset: {
             width: 2,
-            height: 2
-        }
+            height: 2,
+        },
+        marginBottom: 10,
+    },
+    articlesContainer: {
+        top: '10%',
+        width: '95%',
     },
     artiste: {
         flexDirection: 'row',
-        justifyContent: 'flex-start',
+        justifyContent: 'space-between',
         alignItems: 'center',
         paddingHorizontal: 20,
         paddingVertical: 10,
@@ -168,17 +159,19 @@ const styles = StyleSheet.create({
         borderRadius: 10,
     },
     articleInfo: {
+        flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'space-between',
     },
     articleName: {
         fontSize: 18,
         fontWeight: 'bold',
-        marginRight: 10,
+        color: 'black',
     },
     detailsButton: {
         padding: 10,
-        backgroundColor: 'pink',
+        backgroundColor: 'rgba(255,165,0,0.3)',
         borderRadius: 5,
         alignItems: 'center',
         justifyContent: 'center',
@@ -208,7 +201,7 @@ const styles = StyleSheet.create({
     },
     miseEnRelationButton: {
         padding: 10,
-        backgroundColor: 'green',
+        backgroundColor: 'rgba(255, 165, 0, 0.8)',
         borderRadius: 5,
         marginBottom: 20,
     },

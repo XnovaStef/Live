@@ -17,11 +17,12 @@ const Home = () => {
     const bottomSheetModalRef2 = useRef<BottomSheetModal | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedGenre, setSelectedGenre] = useState('');
+    const [selectedDate, setSelectedDate] = useState('');
     const [userLocation, setUserLocation] = useState(null);
     const [lives, setLives] = useState([]);
     const [filteredLives, setFilteredLives] = useState([]);
     const [genres, setGenres] = useState([]);
-    const [date, setDate] = useState([]);
+    const [date, setDate] = useState(new Date());
    
 
     const snapPoints = useMemo(() => ['45%', '85%'], []);
@@ -43,7 +44,6 @@ const Home = () => {
         bottomSheetModalRef1.current?.present();
     }, []);
 
-    // Fetch user location and lives data here
     useEffect(() => {
         // Simulate fetching user location
         setUserLocation({
@@ -60,9 +60,9 @@ const Home = () => {
                 setFilteredLives(livesData);
 
                 // Extract genres from lives data
-                const genresData = [...new Set(livesData.map(live => live.genre))];
+                const genresData = [...new Set(livesData.map((live: { genre: any; }) => live.genre))];
                 setGenres(genresData);
-                const dateData = [...new Set(livesData.map(live => live.date_live))];
+                const dateData = [...new Set(livesData.map((live: { date_live: any; }) => live.date_live))];
                 setDate(dateData);
             } catch (error) {
                 console.error('Error fetching lives:', error);
@@ -73,27 +73,33 @@ const Home = () => {
     }, []);
 
     useEffect(() => {
-        // Filter the lives based on search query and selected genre
+        // Filter the lives based on search query, selected genre, and selected date
         let filtered = lives;
 
         if (searchQuery) {
             filtered = filtered.filter(live =>
-                live.lieu.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                live.adresse.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 live.artiste.toLowerCase().includes(searchQuery.toLowerCase())
             );
         }
-
-        
 
         if (selectedGenre) {
             filtered = filtered.filter(live => live.genre === selectedGenre);
         }
 
+        if (selectedDate) {
+            filtered = filtered.filter(live => live.date_live === selectedDate);
+        }
+
         setFilteredLives(filtered);
-    }, [searchQuery, selectedGenre, lives]);
+    }, [searchQuery, selectedGenre, selectedDate, lives]);
 
     const handleGenreSelect = (genre) => {
         setSelectedGenre(genre);
+    };
+
+    const handleDateSelect = (date) => {
+        setSelectedDate(date);
     };
 
     const handleLiveSelect = (live) => {
@@ -125,8 +131,7 @@ const Home = () => {
                         genres={genres}
                         date={date}
                         selectedGenre={selectedGenre}
-                        onGenreSelect={handleGenreSelect} selectedLive={undefined}                        
-                    />
+                        onGenreSelect={handleGenreSelect} selectedLive={undefined} setSelectedLive={undefined} setDate={undefined}                    />
                 </BottomSheetModal>
                 <BottomSheetModal
                     ref={bottomSheetModalRef2}

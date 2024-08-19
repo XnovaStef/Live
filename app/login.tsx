@@ -52,7 +52,7 @@ const Login = () => {
       console.log('User ID:', userId);
 
       navigation.navigate('home');
-    } catch (error) {
+    } catch (error: any) {
       console.log(error);
       if (error.response && error.response.status === 400) {
         Alert.alert('Numéro ou mot de passe incorrect');

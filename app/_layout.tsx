@@ -3,9 +3,9 @@ import { StyleSheet, View } from 'react-native';
 import * as Location from 'expo-location';
 import { createStackNavigator } from '@react-navigation/stack';
 import Welcome from './welcome';
-import Register from './register';
-import Login from './login';
-import Forgot from './forgot';
+//import Register from './register';
+//import Login from './login';
+//import Forgot from './forgot';
 import Home from './home';
 import Reservation from './reservation';
 import Services from './services';
@@ -62,10 +62,7 @@ const Layout = () => {
       }}
     >
       <Stack.Screen name="welcome" component={Welcome} />
-      <Stack.Screen name="register" component={Register} />
       <Stack.Screen name="verify" component={Verify} />
-      <Stack.Screen name="login" component={Login} />
-      <Stack.Screen name="forgot" component={Forgot} />
       <Stack.Screen name="home" component={Home} />
       <Stack.Screen name="reservation" component={Reservation} />
       <Stack.Screen name="paiement" component={Paiement} />

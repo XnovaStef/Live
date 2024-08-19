@@ -17,16 +17,11 @@ import Background from '@/component/background';
 import { Alert } from 'react-native';
 
 const Paiement = ({ route }) => {
-    const { lieu_live, date_live, heure_live, prix_reserv, prix_ticket } = route.params;
+    const { lieu_live, date_live, heure_live, prix_reserv, prix_ticket, type, artiste } = route.params;
 
     const [place, setPlace] = useState('');
     const [message, setMessage] = useState('');
     const [idUser, setIdUser] = useState('');
-
-    const [commune, setCommune] = useState('');
-    const [tel, setTel] = useState('');
-    const [nom, setNom] = useState('');
-    const [prenom, setPrenom] = useState('');
     const [email, setEmail] = useState('');
 
     const [isPaying, setIsPaying] = useState(false);
@@ -38,16 +33,6 @@ const Paiement = ({ route }) => {
                 AsyncStorage.getItem('userId')
                     .then(userId => {
                         setIdUser(userId);
-                        axios.get(`https://live-pro.onrender.com/api/user/users/${userId}`, {
-                            headers: { Authorization: `Bearer ${token}` }
-                        })
-                            .then(response => {
-                                setNom(response.data.nom);
-                                setPrenom(response.data.prenom);
-                                setEmail(response.data.email);
-                                setTel(response.data.tel);
-                            })
-                            .catch(error => console.log(error));
                     })
                     .catch(error => console.log(error));
             })
@@ -55,7 +40,7 @@ const Paiement = ({ route }) => {
     }, []);
 
     const pay = async () => {
-        if (!nom || !prenom || !email || !place) {
+        if (!email || !place) {
             Alert.alert("Erreur", "Veuillez remplir tous les champs.");
             return;
         }
@@ -63,14 +48,14 @@ const Paiement = ({ route }) => {
         setIsPaying(true);
         try {
             const response = await axios.post('https://live-pro.onrender.com/api/user/pay', {
-                nom,
-                prenom,
                 email,
                 lieu_live,
                 heure_live,
                 date_live,
                 prix_ticket,
                 place,
+                type, 
+                artiste
             });
             setMessage(response.data.message);
             Alert.alert("Succès", response.data.message);
@@ -84,7 +69,7 @@ const Paiement = ({ route }) => {
     };
 
     const reserv = async () => {
-        if (!nom || !prenom || !email || !place) {
+        if (!email || !place) {
             Alert.alert("Erreur", "Veuillez remplir tous les champs.");
             return;
         }
@@ -92,14 +77,14 @@ const Paiement = ({ route }) => {
         setIsReserving(true);
         try {
             const response = await axios.post('https://live-pro.onrender.com/api/user/reserv', {
-                nom,
-                prenom,
                 email,
                 lieu_live,
                 heure_live,
                 date_live,
                 prix_reserv,
                 place,
+                type,
+                artiste
             });
             setMessage(response.data.message);
             Alert.alert("Succès", response.data.message);
@@ -131,34 +116,6 @@ const Paiement = ({ route }) => {
                             </TouchableOpacity>
 
                             <View style={styles.input}>
-                                <Text style={styles.inputLabel}>Nom</Text>
-                                <TextInput
-                                    autoCapitalize="none"
-                                    autoCorrect={false}
-                                    clearButtonMode="while-editing"
-                                    onChangeText={(text) => setNom(text)}
-                                    value={nom}
-                                    placeholder='nom'
-                                    placeholderTextColor="#6b7280"
-                                    style={styles.inputControl}
-                                />
-                            </View>
-
-                            <View style={styles.input}>
-                                <Text style={styles.inputLabel}>Prénom</Text>
-                                <TextInput
-                                    autoCapitalize="none"
-                                    autoCorrect={false}
-                                    clearButtonMode="while-editing"
-                                    onChangeText={(text) => setPrenom(text)}
-                                    value={prenom}
-                                    placeholder='prenom'
-                                    placeholderTextColor="#6b7280"
-                                    style={styles.inputControl}
-                                />
-                            </View>
-
-                            <View style={styles.input}>
                                 <Text style={styles.inputLabel}>Email</Text>
                                 <TextInput
                                     autoCapitalize="none"
@@ -185,6 +142,34 @@ const Paiement = ({ route }) => {
                                     style={styles.inputControl}
                                 />
                             </View>
+                            <View style={styles.input}>
+                                <Text style={styles.inputLabel}>Type</Text>
+                                <TextInput
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                    clearButtonMode="while-editing"
+                                    editable={false}
+                                    value={type}
+                                    placeholder='type'
+                                    placeholderTextColor="#6b7280"
+                                    style={styles.inputControl}
+                                />
+                            </View>
+
+                            <View style={styles.input}>
+                                <Text style={styles.inputLabel}>Artiste</Text>
+                                <TextInput
+                                    autoCapitalize="none"
+                                    autoCorrect={false}
+                                    clearButtonMode="while-editing"
+                                    editable={false}
+                                    value={artiste}
+                                    placeholder='artiste'
+                                    placeholderTextColor="#6b7280"
+                                    style={styles.inputControl}
+                                />
+                            </View>
+                            
                             <View style={styles.input}>
                                 <Text style={styles.inputLabel}>Prix Ticket</Text>
                                 <TextInput

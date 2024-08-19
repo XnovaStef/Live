@@ -15,7 +15,7 @@ const Services = () => {
   const [isFocused, setIsFocused] = useState(false);
   const router = useRouter();
 
-  const [nom, setNom] = useState('');
+ /* const [nom, setNom] = useState('');
   const [prenom, setPrenom] = useState('');
 
   useEffect(() => {
@@ -48,7 +48,7 @@ const Services = () => {
     };
 
     getUserInfo();
-  }, []);
+  }, []);*/
 
   const services = [
     { label: "Location",  action: () => router.push("location") },
@@ -66,7 +66,7 @@ const Services = () => {
         <StatusBar barStyle="white" backgroundColor="#f8f8f8" />
         <View style={styles.header}>
           <Text style={styles.title}>
-            Bienvenue <Text style={styles.highlight}>{prenom}</Text>
+            Bienvenue 
           </Text>
           <Text style={styles.subtitle}>
             Quel est votre besoin ?

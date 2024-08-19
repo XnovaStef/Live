@@ -1,19 +1,37 @@
-import React, { useCallback, useRef, useState } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableWithoutFeedback, Keyboard, TouchableOpacity, Dimensions, BackHandler } from "react-native";
+import React, { useCallback, useRef, useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TextInput, TouchableWithoutFeedback, Keyboard, TouchableOpacity, Dimensions } from 'react-native';
 import PagerView from 'react-native-pager-view';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { useRouter } from 'expo-router';
 import { Audio } from 'expo-av';
-import Background from "./background";
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 
 const windowWidth = Dimensions.get('screen').width;
 
-const OnboardingPage = ({ searchQuery, setSearchQuery, genres, selectedGenre, onGenreSelect, selectedLive, date }) => {
+const OnboardingPage = ({ searchQuery, setSearchQuery, genres, selectedGenre, onGenreSelect, selectedLive, setSelectedLive, date, setDate, liveEvents }) => {
   const pagerRef = useRef<PagerView>(null);
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [filteredEvents, setFilteredEvents] = useState([]);
   const router = useRouter();
+
+  // Assurez-vous que `liveEvents` est un tableau
+  useEffect(() => {
+    if (Array.isArray(liveEvents)) {
+      // Filtrer les événements en fonction de la date sélectionnée
+      if (date) {
+        const formattedDate = date.toISOString().split('T')[0]; // Convertir la date au format 'YYYY-MM-DD'
+        const filtered = liveEvents.filter(event => event.date_live === formattedDate);
+        setFilteredEvents(filtered);
+      } else {
+        setFilteredEvents(liveEvents); // Si aucune date n'est sélectionnée, afficher tous les événements
+      }
+    } else {
+      console.error("`liveEvents` doit être un tableau");
+    }
+  }, [date, liveEvents]);
 
   const handlePageChange = useCallback((index: number) => {
     setCurrentPage(index);
@@ -21,19 +39,17 @@ const OnboardingPage = ({ searchQuery, setSearchQuery, genres, selectedGenre, on
 
   const togglePlay = async () => {
     if (isPlaying) {
-      // Pause the sound
       if (sound) {
         await sound.pauseAsync();
         setIsPlaying(false);
       }
     } else {
-      // Play the sound
       if (sound) {
         await sound.playAsync();
         setIsPlaying(true);
       } else {
         const { sound: newSound } = await Audio.Sound.createAsync(
-          require('@/app/assets/extrait.mp3')  // Remplacez par le chemin de votre fichier audio
+          require('@/app/assets/extrait.mp3')
         );
         setSound(newSound);
         await newSound.playAsync();
@@ -57,8 +73,34 @@ const OnboardingPage = ({ searchQuery, setSearchQuery, genres, selectedGenre, on
     }
   };
 
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleConfirm = (date) => {
+    if (setDate) { // Assurez-vous que setDate est défini avant de l'appeler
+      setDate(date);
+    }
+    hideDatePicker();
+  };
+
+  const handleGenreSelect = (genre: string) => {
+    if (genre === 'Tout') {
+      onGenreSelect(null); // Réinitialiser la sélection
+      setFilteredEvents(liveEvents); // Afficher tous les événements
+    } else {
+      onGenreSelect(genre); // Sélectionner un genre spécifique
+    }
+  };
+
+  // Assurez-vous que `date` est un objet Date valide
+  const dateValue = date instanceof Date ? date : new Date();
+
   return (
-    
     <View style={styles.container}>
       <PagerView
         style={styles.pagerView}
@@ -71,6 +113,9 @@ const OnboardingPage = ({ searchQuery, setSearchQuery, genres, selectedGenre, on
           <Text style={styles.h2}>Localité</Text>
           <TouchableWithoutFeedback onPressIn={() => Keyboard.dismiss()}>
             <View style={styles.searchBarWrapper}>
+              <TouchableOpacity onPress={showDatePicker}>
+                <Icon name="calendar" size={20} color="black" style={styles.calendarIcon} />
+              </TouchableOpacity>
               <TextInput
                 style={styles.searchBar}
                 placeholder="Search for locations"
@@ -82,16 +127,23 @@ const OnboardingPage = ({ searchQuery, setSearchQuery, genres, selectedGenre, on
           </TouchableWithoutFeedback>
           <Text style={styles.h3}>Genre musical</Text>
           <View style={styles.buttonContainer}>
-            {genres.map((genre, index) => (
-              <TouchableOpacity
-                key={index}
-                style={[styles.button, selectedGenre === genre && styles.selectedGenreButton]}
-                onPress={() => onGenreSelect(genre)}
-              >
-                <Text style={styles.buttonText}>{genre}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+  <TouchableOpacity
+    style={[styles.button, selectedGenre === null && styles.selectedGenreButton]}
+    onPress={() => handleGenreSelect('Tout')}
+  >
+    <Text style={styles.buttonText}>Tout</Text>
+  </TouchableOpacity>
+  {genres.map((genre, index) => (
+    <TouchableOpacity
+      key={index}
+      style={[styles.button, selectedGenre === genre && styles.selectedGenreButton]}
+      onPress={() => handleGenreSelect(genre)}
+    >
+      <Text style={styles.buttonText}>{genre}</Text>
+    </TouchableOpacity>
+  ))}
+</View>
+
           <View style={styles.actionButtonsContainer}>
             <TouchableOpacity style={styles.actionButton} onPress={navigateToContact}>
               <Text style={styles.buttonText1}>Contacter artiste</Text>
@@ -116,23 +168,9 @@ const OnboardingPage = ({ searchQuery, setSearchQuery, genres, selectedGenre, on
             </View>
           </TouchableWithoutFeedback>
           <View style={styles.section}>
-            <Icon name="map-marker" size={20} color="pink" style={styles.sectionIcon} />
-            <View>
-              <Text style={styles.sectionText}>Address</Text>
-              <Text style={styles.h2}>Riviera palmeraie</Text>
-            </View>
-          </View>
-          <View style={styles.section}>
-            <Icon name="clock-o" size={20} color="pink" style={styles.sectionIcon} />
-            <View>
-              <Text style={styles.sectionText}>Date</Text>
-              <Text style={styles.h2}>{date}</Text>
-            </View>
-          </View>
-          <View style={styles.section}>
             <TouchableOpacity onPress={togglePlay}>
               <Icon
-                name={isPlaying ? "pause-circle" : "play-circle"}
+                name={isPlaying ? 'pause-circle' : 'play-circle'}
                 size={20}
                 color="pink"
                 style={styles.sectionIcon}
@@ -154,8 +192,18 @@ const OnboardingPage = ({ searchQuery, setSearchQuery, genres, selectedGenre, on
         </View>
       </PagerView>
       <TouchableOpacity style={styles.nextButton} onPress={goToNextPage}>
-        <Icon name={currentPage === 0 ? "arrow-right" : "arrow-left"} size={24} color="white" />
+        <Icon name={currentPage === 0 ? 'arrow-right' : 'arrow-left'} size={24} color="white" />
       </TouchableOpacity>
+      <DateTimePickerModal
+        isVisible={isDatePickerVisible}
+        mode="date"
+        date={dateValue}  // Assurez-vous que `date` est un objet Date valide
+        onConfirm={handleConfirm}
+        onCancel={hideDatePicker}
+        headerTextIOS="Sélectionner une date"
+        confirmTextIOS="Confirmer"
+        cancelTextIOS="Annuler"
+      />
     </View>
   );
 };
@@ -179,91 +227,90 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: "#1E1E1E",
+    color: '#1E1E1E',
   },
   h2: {
     fontSize: 11,
     marginTop: 5,
     fontWeight: '100',
-    color: "#9D9D9D",
+    color: '#9D9D9D',
   },
   h3: {
     fontSize: 15,
     marginTop: 40,
     fontWeight: '300',
-    color: "#1E1E1E",
+    color: '#1E1E1E',
   },
   searchBarWrapper: {
-    borderBottomWidth: 1,
-    borderBottomColor: 'black',
-    marginBottom: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
   },
   searchBar: {
-    height: 15,
-    width: windowWidth - 32,
+    flex: 1,
+    height: 40,
+    borderWidth: 1,
+    borderColor: '#DCDCDC',
+    borderRadius: 5,
     paddingHorizontal: 10,
-    fontSize: 10,
-    marginTop: 20,
+    fontSize: 16,
+  },
+  calendarIcon: {
+    marginRight: 10,
   },
   buttonContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginTop: 20,
+    marginTop: 10,
   },
   button: {
-    backgroundColor: 'pink',
-    padding: 10,
+    backgroundColor: '#F0F0F0',
     borderRadius: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
     margin: 5,
   },
+  selectedGenreButton: {
+    backgroundColor: '#E91E63',
+  },
   buttonText: {
-    color: 'white',
-    fontSize: 14,
+    color: '#1E1E1E',
   },
   actionButtonsContainer: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginTop: 20,
   },
   actionButton: {
-    backgroundColor: 'red',
-    padding: 15,
-    borderRadius: 20,
-    marginVertical: 10,
-    width: '80%',
-    alignItems: 'center',
+    backgroundColor: '#E91E63',
+    borderRadius: 5,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    margin: 5,
   },
   buttonText1: {
     color: 'white',
-    fontSize: 14,
-  },
-  selectedGenreButton: {
-    backgroundColor: '#ccc',
   },
   section: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 20,
+    marginVertical: 20,
   },
   sectionIcon: {
-    fontSize: 25,
     marginRight: 10,
   },
   sectionText: {
-    fontSize: 10,
-    color: "#9D9D9D",
+    fontSize: 16,
   },
   nextButton: {
     position: 'absolute',
-    bottom: 20,
-    right: 20,
-    backgroundColor: 'red',
+    bottom: 30,
+    right: 30,
+    backgroundColor: '#E91E63',
+    borderRadius: 50,
     padding: 10,
-    borderRadius: 20,
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

@@ -58,11 +58,11 @@ const Localisation = () => {
     };
 
     const articles: Article[] = [
-        { id: 1, image: require('@/app/assets/carousel1.jpg'), name: 'Article 1', price: '10$', description: 'Description 1' },
-        { id: 2, image: require('@/app/assets/carousel2.jpg'), name: 'Article 2', price: '20$', description: 'Description 2' },
-        { id: 3, image: require('@/app/assets/carousel3.jpg'), name: 'Article 3', price: '30$', description: 'Description 3' },
-        { id: 4, image: require('@/app/assets/carousel1.jpg'), name: 'Article 4', price: '40$', description: 'Description 4' },
-        { id: 5, image: require('@/app/assets/carousel2.jpg'), name: 'Article 5', price: '50$', description: 'Description 5' },
+        { id: 1, image: require('@/app/assets/podium.jpg'), name: 'Podium', price: '15000 FCFA', description: 'Description 1' },
+        { id: 2, image: require('@/app/assets/ecran.jpg'), name: 'Ecran géant', price: '2000 FCFA', description: 'Description 2' },
+        { id: 3, image: require('@/app/assets/carousel3.jpg'), name: 'Orchestre', price: '10000 FCFA', description: 'Description 3' },
+        { id: 4, image: require('@/app/assets/sono.jpg'), name: 'Sono', price: '5000 FCFA', description: 'Description 4' },
+        { id: 5, image: require('@/app/assets/chaise.jpg'), name: 'Chaise', price: '15000 FCFA', description: 'Description 5' },
     ];
 
     return (
@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
     },
     detailsButton: {
         marginTop: 10,
-        backgroundColor: '#007bff',
+        backgroundColor: 'rgba(255,165,0,0.3)',
         paddingVertical: 8,
         paddingHorizontal: 20,
         borderRadius: 5,
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 20, // Adjust the value as needed
         right: 20, // Adjust the value as needed
-        backgroundColor: '#007bff',
+        backgroundColor: 'rgba(255,165,0,0.3)',
         width: 50,
         height: 50,
         borderRadius: 25,
@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
         width: 30,
         height: 30,
         borderRadius: 15,
-        backgroundColor: '#007bff',
+        backgroundColor: 'rgba(255,165,0,0.3)',
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -335,12 +335,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     datePickerText: {
-        color: '#007bff',
+        color: 'rgba(255,165,0,0.3)',
         fontSize: 16,
         textDecorationLine: 'underline',
     },
     addToCartButton: {
-        backgroundColor: '#007bff',
+        backgroundColor: 'rgba(255,165,0,0.3)',
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 5,
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     rentButton: {
-        backgroundColor: '#007bff',
+        backgroundColor: 'rgba(255,165,0,0.3)',
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 5,
